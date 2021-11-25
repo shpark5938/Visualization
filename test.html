@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <script>
+        // xlsx 패키지 로드
+        var xlsx = require("xlsx");
+        // 엑셀파일 읽기, 날짜는 자바스크립트형식으로 처리
+        // var wb = xlsx.readFile("./news_result.xlsx", {cellDates:true, cellStyles:true});
+        var wb = xlsx.readFile("news_result.xlsx");
+
+        // 워크시트 지정
+        // var ws = wb.Sheets["sheet1"];
+        var ws = wb.Sheets[0];
+
+        // 워크시트 데이터를 재순(JSON)형식으로 변환
+        var data = xlsx.utils.sheet_to_json(ws);
+        console.log(data)
+    </script>
+</div>
+</body>
+</html>

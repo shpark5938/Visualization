@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>js excel example 03</title>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.14.3/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker3.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker3.standalone.min.csss">
+    <script type="text/javascript">
+        // const xlsx = require("xlsx");
+        var data;
+        var len;
+        // xlsx 패키지 로드
+        // var xlsx = require("xlsx");
+        // // 엑셀파일 읽기, 날짜는 자바스크립트형식으로 처리
+        // // var wb = xlsx.readFile("./news_result.xlsx", {cellDates:true, cellStyles:true});
+        // var wb = xlsx.readFile("news_result.xlsx");
+        //
+        // // 워크시트 지정
+        // // var ws = wb.Sheets["sheet1"];
+        // var ws = wb.Sheets[0];
+        //
+        // // 워크시트 데이터를 재순(JSON)형식으로 변환
+        // var data = xlsx.utils.sheet_to_json(ws);
+        // console.log(data)
+
+        /* 엑셀 첨부*/
+        function excelExport(event){
+            excelExportCommon(event, handleExcelDataAll);
+        }
+        function excelExportCommon(event, callback){
+            var input = event.target;
+            var reader = new FileReader();
+            reader.onload = function(){
+                var fileData = reader.result;
+                var wb = XLSX.read(fileData, {type : 'binary'});
+
+                wb.SheetNames.forEach(function(sheetName) {
+                    console.log('SheetName: ' + sheetName);
+                    data = XLSX.utils.sheet_to_json(wb.Sheets[sheetName]);
+                    console.log(typeof(data))
+                    len = data.length; // 데이터 갯수
+                    console.log(data[1]);
+                })
+            };
+            reader.readAsBinaryString(input.files[0]);
+        }
+
+        function handleExcelDataAll(sheet){
+            handleExcelDataHtml(sheet); // html 형태
+        }
+
+        function handleExcelDataHtml(sheet){
+            $("#displayExcelHtml").html(XLSX.utils.sheet_to_html (sheet));
+        }
+
+        var search;
+        var date1;
+        var date2;
+        var dateList = [];
+        var countList = [];
+
+        /* 임시 */
+        var temp1 = []
+        var temp2 = []
+
+        function filter(){
+            search = document.getElementById("search").value
+            console.log(search)
+            console.log(len)
+            for(var i=0; i<len; i++)
+            {
+                if(data[i].title.indexOf(search) != -1)
+                {
+                    dateList.push(data[i].date)
+                    countList.push(i) //수정필요
+                }
+                // console.log(dateList[-1])
+            }
+            // date1 = document.getElementById("datePick").value
+            // date2 = document.getElementById("datePick2").value
+            // date1 = date1.replace(/\-/g, "")
+            // date2 = date2.replace(/\-/g, "")
+            // console.log(date1)
+            // console.log(date2)
+            // console.log(data[0].date)
+            // for(var i=0; i<len; i++){
+            //     data[i].date = data[i].date.replace(/\./g, "")
+            //     if(data[i].title.indexOf(search) != -1 && date1 <= data[i].date && data[i].date <= date2){
+            //         document.getElementById("result").innerHTML += "[" + data[i].seq + "] [" + data[i].date + "] " + data[i].title + "<br>"
+            //     }
+            // }
+            console.log(dateList.length)
+            console.log(countList.length)
+
+            /* 임시 */
+            for(var i=0; i<10; i++)
+            {
+                temp1.push(10-i)
+                temp2.push(i)
+            }
+        }
+    </script>
+</head>
+<body>
+<br>
+<div>
+    <label>시작      날짜</label>
+    <input type="text" onchange="filter()" id="datePick">
+    <label>종료  날짜</label>
+    <input type="text" onchange="filter()" id="datePick2">
+
+    파일 선택 : <input type="file" id="excelFile" onchange="excelExport(event)"/>
+    <div id="result"></div>
+
+    <form name = "search">
+        <label>검색어 입력</label>
+        <input type="text" name="keyWord">
+
+        <button type="button" id="searchData">검색</button>
+    </form>
+
+</div>
+
+<div style="width: 500px; height: 500px;">
+    <!--차트가 그려질 부분-->
+    <canvas id="myChart"></canvas>
+</div>
+<div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.kr.min.js"></script>
+    <script type="text/javascript">
+        $('#datePicker').datepicker({
+            format: "yyyy-mm-dd",
+            language: "kr",
+        });
+        $('#datePicker2').datepicker({
+            format: "yyyy-mm-dd",
+            language: "kr",
+        });
+        $('#click-btn').on('click', function() {
+            var date = $('#dateRangePicker').val();
+            alert(date);
+        });
+        jQuery("#calendar").datepicker({
+            beforeShow: function(input) {
+                var i_offset = jQuery(input).offset();      // 클릭된 input의 위치값 체크
+                setTimeout(function(){
+                    jQuery("#ui-datepicker-div").css({"left":i_offset});
+
+                    // datepicker의 div의 포지션을 강제로 클릭한 input 위취로 이동시킨다.
+                })
+            }
+        });
+
+        var context = document
+            .getElementById('myChart')
+            .getContext('2d');
+
+        // date1 = document.getElementById("datePick").value
+        // date2 = document.getElementById("datePick2").value
+        // date1 = date1.replace(/\-/g, "")
+        // date2 = date2.replace(/\-/g, "")
+        // console.log(date1)
+        // console.log(date2)
+
+        var myChart = new Chart(context, {
+            type: 'line', // 차트의 형태
+            data: { // 차트에 들어갈 데이터
+                labels: [
+                    //x 축
+                    '1','2','3','4','5','6','7'
+                    //toString(date1), toString(date2)
+                ],
+                datasets: [
+                    { //데이터
+                        label: 'test1', //차트 제목
+                        fill: false, // line 형태일 때, 선 안쪽을 채우는지 안채우는지
+                        data: [
+                            21,19,25,20,23,26,25 //x축 label에 대응되는 데이터 값
+                        ],
+                        backgroundColor: [
+                            //색상
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            //경계선 색상
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1 //경계선 굵기
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    yAxes: [
+                        { ticks: { beginAtZero: true } }
+                    ]
+                }
+            }
+        });
+
+        document.getElementById('searchData').onclick = function(){
+            console.log(document.search.keyWord.value)
+            //데이터셋 수 만큼 반복
+            var dataset = myChart.data.datasets;
+            for(var i=0; i<dataset.length; i++){
+                console.log(dataset);
+                //데이터 갯수 만큼 반복
+                var data = dataset[i].data;
+                for(var j=0 ; j < data.length ; j++){
+                    data[j] = Math.floor(Math.random() * 50);
+                }
+            }
+
+            myChart.update();	//차트 업데이트
+        }
+
+
+        /* 참고
+        //데이터 추가
+        document.getElementById('addData').onclick = function(){
+            //라벨추가
+            myChart.data.labels.push('data'+myChart.data.labels.length)
+            //데이터셋 수 만큼 반복
+            var dataset = myChart.data.datasets;
+            for(var i=0; i<dataset.length; i++){
+                //데이터셋의 데이터 추가
+                dataset[i].data.push(Math.floor(Math.random() * 50));
+            }
+            myChart.update();	//차트 업데이트
+        }
+        */
+    </script>
+</div>
+<!--
+<h1>HTML 형태로 보기</h1>
+-->
+<!--<div id="displayExcelHtml"></div>-->
+</body>
+</html>
